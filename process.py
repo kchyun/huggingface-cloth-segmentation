@@ -129,19 +129,22 @@ def generate_mask(input_image, net, palette, device = 'cpu'):
             classes_to_save.append(cls)
 
     # Save alpha masks
+    alpha_masks = {}
     for cls in classes_to_save:
         alpha_mask = (output_arr == cls).astype(np.uint8) * 255
         alpha_mask = alpha_mask[0]  # Selecting the first channel to make it 2D
         alpha_mask_img = Image.fromarray(alpha_mask, mode='L')
         alpha_mask_img = alpha_mask_img.resize(img_size, Image.BICUBIC)
         alpha_mask_img.save(os.path.join(alpha_out_dir, f'{cls}.png'))
+        alpha_masks[cls] = alpha_mask_img
 
     # Save final cloth segmentations
     cloth_seg = Image.fromarray(output_arr[0].astype(np.uint8), mode='P')
     cloth_seg.putpalette(palette)
     cloth_seg = cloth_seg.resize(img_size, Image.BICUBIC)
     cloth_seg.save(os.path.join(cloth_seg_out_dir, 'final_seg.png'))
-    return cloth_seg
+    
+    return alpha_masks, cloth_seg
 
 
 
